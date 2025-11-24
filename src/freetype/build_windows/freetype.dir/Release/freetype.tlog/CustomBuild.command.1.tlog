@@ -1,0 +1,10 @@
+^C:\USERS\RUAN\DOCUMENTS\GITHUB\DART_FREETYPE\SRC\FREETYPE\CMAKELISTS.TXT
+setlocal
+C:\Users\Ruan\AppData\Local\Android\Sdk\cmake\3.31.6\bin\cmake.exe -SC:/Users/Ruan/Documents/GitHub/dart_freetype/src/freetype -BC:/Users/Ruan/Documents/GitHub/dart_freetype/src/freetype/build_windows --check-stamp-file C:/Users/Ruan/Documents/GitHub/dart_freetype/src/freetype/build_windows/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
