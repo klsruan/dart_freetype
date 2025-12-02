@@ -1,31 +1,29 @@
-# dart_freetype/src/linux/CMakeLists.txt
+# linux/CMakeLists.txt
 cmake_minimum_required(VERSION 3.10)
-project(dart_freetype_linux LANGUAGES CXX)
+project(dart_freetype_linux LANGUAGES C)
 
-set(NATIVE_LIBS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../lib")
-set(PLUGIN_BUNDLE_DEBUG_DIR   "${CMAKE_BINARY_DIR}/../../../debug/lib")
-set(PLUGIN_BUNDLE_RELEASE_DIR "${CMAKE_BINARY_DIR}/../../../release/bundle/lib")
+set(FREETYPE_SO_SRC "${CMAKE_CURRENT_SOURCE_DIR}/lib/libfreetype.so")
+set(FLUTTER_BUNDLE_DEBUG   "${CMAKE_BINARY_DIR}/../../debug/bundle/lib/x86_64")
+set(FLUTTER_BUNDLE_RELEASE "${CMAKE_BINARY_DIR}/../../release/bundle/lib/x86_64")
+
+file(MAKE_DIRECTORY "${FLUTTER_BUNDLE_DEBUG}")
+file(MAKE_DIRECTORY "${FLUTTER_BUNDLE_RELEASE}")
 
 add_custom_command(
     OUTPUT
-        "${CMAKE_BINARY_DIR}/freetype_copied_debug"
-        "${CMAKE_BINARY_DIR}/freetype_copied_release"
-    COMMAND ${CMAKE_COMMAND} -E make_directory
-        "${PLUGIN_BUNDLE_DEBUG_DIR}"
-        "${PLUGIN_BUNDLE_RELEASE_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${NATIVE_LIBS_SOURCE_DIR}"
-        "${PLUGIN_BUNDLE_DEBUG_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${NATIVE_LIBS_SOURCE_DIR}"
-        "${PLUGIN_BUNDLE_RELEASE_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E touch
-        "${CMAKE_BINARY_DIR}/freetype_copied_debug"
-        "${CMAKE_BINARY_DIR}/freetype_copied_release"
+        "${FLUTTER_BUNDLE_DEBUG}/libfreetype.so"
+        "${FLUTTER_BUNDLE_RELEASE}/libfreetype.so"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${FREETYPE_SO_SRC}"
+        "${FLUTTER_BUNDLE_DEBUG}/libfreetype.so"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${FREETYPE_SO_SRC}"
+        "${FLUTTER_BUNDLE_RELEASE}/libfreetype.so"
     VERBATIM
 )
 
-add_custom_target(copy_freetype ALL DEPENDS
-    "${CMAKE_BINARY_DIR}/freetype_copied_debug"
-    "${CMAKE_BINARY_DIR}/freetype_copied_release"
+add_custom_target(copy_freetype_linux ALL
+    DEPENDS
+        "${FLUTTER_BUNDLE_DEBUG}/libfreetype.so"
+        "${FLUTTER_BUNDLE_RELEASE}/libfreetype.so"
 )
