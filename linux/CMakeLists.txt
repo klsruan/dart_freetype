@@ -1,30 +1,32 @@
 cmake_minimum_required(VERSION 3.10)
-project(dart_freetype)
+project(dart_freetype_linux VERSION 1.0.0 LANGUAGES CXX)
 
-set(FREETYPE_SO_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
+set(FREETYPE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../lib")
 
-set(FLUTTER_DEBUG_DIR   "${CMAKE_BINARY_DIR}/../runner/Debug")
-set(FLUTTER_RELEASE_DIR "${CMAKE_BINARY_DIR}/../runner/Release")
+set(FLUTTER_PLUGIN_LIB_DIR_DEBUG   "${CMAKE_BINARY_DIR}/../../debug/lib")
+set(FLUTTER_PLUGIN_LIB_DIR_RELEASE "${CMAKE_BINARY_DIR}/../../release/bundle/lib")
 
 add_custom_command(
     OUTPUT
-        "${CMAKE_BINARY_DIR}/Debug/.sos_copied_stamp"
-        "${CMAKE_BINARY_DIR}/Release/.sos_copied_stamp"
+        "${CMAKE_BINARY_DIR}/freetype_copied_debug"
+        "${CMAKE_BINARY_DIR}/freetype_copied_release"
     COMMAND ${CMAKE_COMMAND} -E make_directory
-        "${FLUTTER_DEBUG_DIR}"
-        "${FLUTTER_RELEASE_DIR}"
+        "${FLUTTER_PLUGIN_LIB_DIR_DEBUG}"
+        "${FLUTTER_PLUGIN_LIB_DIR_RELEASE}"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${FREETYPE_SO_SOURCE_DIR}" "${FLUTTER_DEBUG_DIR}"
+        "${FREETYPE_SOURCE_DIR}"
+        "${FLUTTER_PLUGIN_LIB_DIR_DEBUG}"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${FREETYPE_SO_SOURCE_DIR}" "${FLUTTER_RELEASE_DIR}"
+        "${FREETYPE_SOURCE_DIR}"
+        "${FLUTTER_PLUGIN_LIB_DIR_RELEASE}"
     COMMAND ${CMAKE_COMMAND} -E touch
-        "${CMAKE_BINARY_DIR}/Debug/.sos_copied_stamp"
-    COMMAND ${CMAKE_COMMAND} -E touch
-        "${CMAKE_BINARY_DIR}/Release/.sos_copied_stamp"
+        "${CMAKE_BINARY_DIR}/freetype_copied_debug"
+        "${CMAKE_BINARY_DIR}/freetype_copied_release"
     VERBATIM
 )
 
-add_custom_target(copy_freetype_dependencies ALL DEPENDS
-    "${CMAKE_BINARY_DIR}/Debug/.sos_copied_stamp"
-    "${CMAKE_BINARY_DIR}/Release/.sos_copied_stamp"
+add_custom_target(copy_freetype ALL
+    DEPENDS
+        "${CMAKE_BINARY_DIR}/freetype_copied_debug"
+        "${CMAKE_BINARY_DIR}/freetype_copied_release"
 )
