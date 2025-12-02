@@ -1,5 +1,0 @@
-C:/Users/Ruan/Documents/GitHub/dart_freetype/src/freetype/build_windows/CMakeFiles/freetype.dir
-C:/Users/Ruan/Documents/GitHub/dart_freetype/src/freetype/build_windows/CMakeFiles/PACKAGE.dir
-C:/Users/Ruan/Documents/GitHub/dart_freetype/src/freetype/build_windows/CMakeFiles/INSTALL.dir
-C:/Users/Ruan/Documents/GitHub/dart_freetype/src/freetype/build_windows/CMakeFiles/ALL_BUILD.dir
-C:/Users/Ruan/Documents/GitHub/dart_freetype/src/freetype/build_windows/CMakeFiles/ZERO_CHECK.dir

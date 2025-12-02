@@ -1,22 +1,30 @@
-# The Flutter tooling requires that developers have CMake 3.10 or later
-# installed. You should not increase this version, as doing so will cause
-# the plugin to fail to compile for some customers of the plugin.
 cmake_minimum_required(VERSION 3.10)
+project(dart_freetype)
 
-# Project-level configuration.
-set(PROJECT_NAME "dart_freetype")
-project(${PROJECT_NAME} LANGUAGES CXX)
+set(FREETYPE_SO_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
-# Invoke the build for native code shared with the other target platforms.
-# This can be changed to accommodate different builds.
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../src" "${CMAKE_CURRENT_BINARY_DIR}/shared")
+set(FLUTTER_DEBUG_DIR   "${CMAKE_BINARY_DIR}/../runner/Debug")
+set(FLUTTER_RELEASE_DIR "${CMAKE_BINARY_DIR}/../runner/Release")
 
-# List of absolute paths to libraries that should be bundled with the plugin.
-# This list could contain prebuilt libraries, or libraries created by an
-# external build triggered from this build file.
-set(dart_freetype_bundled_libraries
-  # Defined in ../src/CMakeLists.txt.
-  # This can be changed to accommodate different builds.
-  $<TARGET_FILE:dart_freetype>
-  PARENT_SCOPE
+add_custom_command(
+    OUTPUT
+        "${CMAKE_BINARY_DIR}/Debug/.sos_copied_stamp"
+        "${CMAKE_BINARY_DIR}/Release/.sos_copied_stamp"
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        "${FLUTTER_DEBUG_DIR}"
+        "${FLUTTER_RELEASE_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${FREETYPE_SO_SOURCE_DIR}" "${FLUTTER_DEBUG_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${FREETYPE_SO_SOURCE_DIR}" "${FLUTTER_RELEASE_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E touch
+        "${CMAKE_BINARY_DIR}/Debug/.sos_copied_stamp"
+    COMMAND ${CMAKE_COMMAND} -E touch
+        "${CMAKE_BINARY_DIR}/Release/.sos_copied_stamp"
+    VERBATIM
+)
+
+add_custom_target(copy_freetype_dependencies ALL DEPENDS
+    "${CMAKE_BINARY_DIR}/Debug/.sos_copied_stamp"
+    "${CMAKE_BINARY_DIR}/Release/.sos_copied_stamp"
 )
