@@ -2,7 +2,7 @@ import 'dart:ffi';
 import 'dart:io';
 import 'generated_bindings.dart';
 
-FreetypeBinding loadFreeType() {
+DynamicLibrary loadDynamicLibrary() {
   late DynamicLibrary lib;
   if (Platform.isWindows) {
     try {
@@ -27,5 +27,9 @@ FreetypeBinding loadFreeType() {
   } else {
     throw UnsupportedError('Unsupported platform');
   }
-  return FreetypeBinding(lib);
+  return lib;
+}
+
+FreetypeBinding loadFreeType() {
+  return FreetypeBinding(loadDynamicLibrary());
 }

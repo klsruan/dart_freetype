@@ -1,5 +1,6 @@
 import 'dart:ffi';
 import 'dart:io';
+import '../load.dart';
 import 'package:ffi/ffi.dart';
 import '../extensions/extensions.dart';
 import '../generated_bindings.dart';
@@ -28,17 +29,7 @@ class Freetype implements Finalizable {
 
   Freetype({DynamicLibrary? dl, String? dllPath, this.allocator = calloc}) {
     if (dl == null) {
-      var path = r'freetype.dll';
-      if (Platform.isWindows) {
-        path = r'freetype.dll';
-      } else if (Platform.isLinux) {
-        ///usr/lib/x86_64-linux-gnu/libfreetype.so.6
-        path = r'libfreetype.so.6';
-      }
-      //join(dirname(Platform.script.path),'..', 'freetype.dll');
-      //print(path);
-      this.dllPath = dllPath == null ? path : dllPath;
-      dylib = DynamicLibrary.open(this.dllPath);
+      dylib = loadDynamicLibrary();
     } else {
       dylib = dl;
     }
