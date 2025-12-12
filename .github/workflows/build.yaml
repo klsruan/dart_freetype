@@ -28,23 +28,14 @@ jobs:
 
       - name: Install dependencies (Windows)
         if: matrix.os == 'windows-latest'
-        shell: bash
-        run: |
-          choco install mingw cmake ninja pkgconfiglite -y
-          echo "PATH=/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/bin:/c/ProgramData/chocolatey/bin:$PATH" >> $GITHUB_ENV
+        run: choco install mingw cmake ninja pkgconfiglite -y
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
 
-      - name: Install dependencies (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: cmd
-        run: flutter pub get
-
-      - name: Install dependencies (Default)
-        if: matrix.os != 'windows-latest'
+      - name: Flutter pub get
         run: flutter pub get
 
       - name: Generate FFI bindings
