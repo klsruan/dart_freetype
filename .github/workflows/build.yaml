@@ -31,8 +31,7 @@ jobs:
         shell: bash
         run: |
           choco install mingw cmake ninja pkgconfiglite -y
-          echo "PATH=/c/ProgramData/chocolatey/bin:$PATH" >> $GITHUB_ENV
-          pacman -S --noconfirm mingw-w64-x86_64-freetype
+          echo "PATH=/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/bin:$PATH" >> $GITHUB_ENV
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
