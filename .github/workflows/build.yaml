@@ -54,7 +54,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: freetype-desktop-${{ matrix.os }}
-          path: build/
+          path: |
+            src/freetype/build_${{ matrix.os }}/*.so
+            src/freetype/build_${{ matrix.os }}/*.dylib
+            src/freetype/build_${{ matrix.os }}/*.dll
 
   build_android:
     name: Build Android (${{ matrix.abi }})
