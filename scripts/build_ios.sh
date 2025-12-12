@@ -42,7 +42,7 @@ for i in "${!ARCHS[@]}"; do
     cp "$DYLIB_FILE" "$INSTALL_DIR/"
 done
 
-UNIVERSAL_LIB="$OUT_DIR/libfreetype_universal.dylib"
+UNIVERSAL_LIB="$OUT_DIR/libfreetype.dylib"
 lipo -create \
     "$OUT_DIR/arm64/libfreetype.dylib" \
     "$OUT_DIR/x86_64/libfreetype.dylib" \
