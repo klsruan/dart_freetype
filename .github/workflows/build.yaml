@@ -15,6 +15,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt update
+          sudo apt install -y cmake meson ninja-build pkg-config libfreetype-dev
+
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install cmake meson ninja pkg-config freetype
+
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          choco install mingw cmake ninja pkgconfiglite -y
+          echo "PATH=/c/ProgramData/chocolatey/bin:$PATH" >> $GITHUB_ENV
+          pacman -S --noconfirm mingw-w64-x86_64-freetype
+
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -35,19 +54,24 @@ jobs:
       - name: Upload desktop artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: freetype-${{ matrix.os }}
+          name: freetype-desktop-${{ matrix.os }}
           path: build/
 
   build_android:
-    name: Build Android (${{ matrix.arch }})
+    name: Build Android (${{ matrix.abi }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        arch: [arm, arm64, x86, x86_64]
+        abi: [armeabi-v7a, arm64-v8a, x86_64]
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt update
+          sudo apt install -y cmake ninja-build pkg-config libfreetype-dev
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
@@ -63,17 +87,14 @@ jobs:
           ndk-version: r26d
           add-to-path: true
 
-      - name: Generate FFI bindings
-        run: flutter pub run ffigen
-
-      - name: Build Android binaries
+      - name: Build Android (.so)
         shell: bash
         run: |
           chmod +x scripts/build_android.sh
-          ./scripts/build_android.sh ${{ matrix.arch }}
+          ./scripts/build_android.sh
 
       - name: Upload android artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: freetype-android-${{ matrix.arch }}
-          path: build/android/${{ matrix.arch }}/
+          name: freetype-android-${{ matrix.abi }}
+          path: build/android/${{ matrix.abi }}/
