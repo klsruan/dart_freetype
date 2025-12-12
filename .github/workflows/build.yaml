@@ -15,11 +15,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Dart
-        uses: dart-lang/setup-dart@v1
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
 
       - name: Generate FFI bindings
-        run: dart run ffigen
+        run: flutter pub run ffigen
 
       - name: Build binaries
         shell: bash
@@ -44,8 +49,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Dart
-        uses: dart-lang/setup-dart@v1
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
 
       - name: Install Android NDK
         uses: nttld/setup-ndk@v1
@@ -54,13 +64,13 @@ jobs:
           add-to-path: true
 
       - name: Generate FFI bindings
-        run: dart run ffigen
+        run: flutter pub run ffigen
 
       - name: Build Android binaries
         shell: bash
         run: |
           chmod +x scripts/build_android.sh
-          ./scripts/build_android.sh
+          ./scripts/build_android.sh ${{ matrix.arch }}
 
       - name: Upload android artifacts
         uses: actions/upload-artifact@v4
