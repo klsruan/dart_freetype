@@ -31,7 +31,6 @@ jobs:
         shell: bash
         run: |
           choco install mingw cmake ninja pkgconfiglite -y
-          choco install git -y
           echo "PATH=/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/bin:/c/ProgramData/chocolatey/bin:$PATH" >> $GITHUB_ENV
 
       - name: Install Flutter
