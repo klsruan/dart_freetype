@@ -97,3 +97,37 @@ jobs:
         with:
           name: freetype-android-${{ matrix.abi }}
           path: build/android/${{ matrix.abi }}/
+
+  build_ios:
+    name: Build iOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install cmake ninja pkg-config freetype ios-cmake
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Generate FFI bindings
+        run: flutter pub run ffigen
+
+      - name: Build iOS (.dylib)
+        shell: bash
+        run: |
+          chmod +x scripts/build_ios.sh
+          ./scripts/build_ios.sh
+
+      - name: Upload iOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: freetype-ios
+          path: native_libs/ios/**
