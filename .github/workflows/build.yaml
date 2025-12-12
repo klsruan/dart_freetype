@@ -28,7 +28,10 @@ jobs:
 
       - name: Install dependencies (Windows)
         if: matrix.os == 'windows-latest'
-        run: choco install mingw cmake ninja pkgconfiglite -y
+        run: |
+          choco install mingw cmake ninja pkgconfiglite -y
+          python -m pip install --upgrade pip
+          pip install meson
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
