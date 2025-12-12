@@ -40,11 +40,15 @@ flutter:
   # Please refer to README.md for a detailed explanation.
   plugin:
     platforms:
-      android:
+      windows:
         ffiPlugin: true
       linux:
         ffiPlugin: true
-      windows:
+      macos:
+        ffiPlugin: true
+      ios:
+        ffiPlugin: true
+      android:
         ffiPlugin: true
 
   assets:
