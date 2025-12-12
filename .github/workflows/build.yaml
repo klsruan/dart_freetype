@@ -110,7 +110,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew update
-          brew install cmake ninja pkg-config freetype ios-cmake
+          brew install cmake ninja pkg-config freetype
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
