@@ -31,7 +31,8 @@ jobs:
         shell: bash
         run: |
           choco install mingw cmake ninja pkgconfiglite -y
-          echo "PATH=/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/bin:$PATH" >> $GITHUB_ENV
+          choco install git -y
+          echo "PATH=/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/bin:/c/ProgramData/chocolatey/bin:$PATH" >> $GITHUB_ENV
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
@@ -55,9 +56,9 @@ jobs:
         with:
           name: freetype-desktop-${{ matrix.os }}
           path: |
-            src/freetype/build_${{ matrix.os }}/*.so
-            src/freetype/build_${{ matrix.os }}/*.dylib
-            src/freetype/build_${{ matrix.os }}/*.dll
+            src/freetype/build_${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows' }}/*.so
+            src/freetype/build_${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows' }}/*.dylib
+            src/freetype/build_${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows' }}/*.dll
 
   build_android:
     name: Build Android (${{ matrix.abi }})
