@@ -1,12 +1,11 @@
 import 'dart:ffi';
 import '../load.dart';
+import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import '../extensions/extensions.dart';
 import '../generated_bindings.dart';
 
 // ignore: unused_import
-import 'package:path/path.dart' show dirname, join;
-
 import '../errors.dart';
 
 // pacman -Syyu
@@ -25,11 +24,7 @@ class Freetype implements Finalizable {
       Finalizer((instance) => instance.free());
 
   Freetype({DynamicLibrary? dl, String? dllPath, this.allocator = calloc}) {
-    if (dl == null) {
-      dylib = loadDynamicLibrary();
-    } else {
-      dylib = dl;
-    }
+    dylib = dl ?? loadDynamicLibrary(path: dllPath);
 
     binding = FreetypeBinding(dylib);
     raw = allocator<Pointer<FT_LibraryRec_>>();
@@ -40,6 +35,14 @@ class Freetype implements Finalizable {
     }
 
     _finalizer.attach(this, this);
+  }
+
+  static Future<Freetype> create({
+    DynamicLibrary? dl,
+    String? dllPath,
+    Allocator allocator = calloc,
+  }) async {
+    return Freetype(dl: dl, dllPath: dllPath, allocator: allocator);
   }
 
   /// Open a font file using its pathname. `face_index` should be 0 if there is only 1 font  in the file.
@@ -63,6 +66,34 @@ class Freetype implements Finalizable {
     );
   }
 
+  Face newFaceFromBytes(Uint8List bytes, {int faceIndex = 0}) {
+    final face = allocator<FT_Face>();
+    final data = allocator<Uint8>(bytes.length);
+    data.asTypedList(bytes.length).setAll(0, bytes);
+
+    final err = binding.FT_New_Memory_Face(
+      raw.value,
+      data.cast(),
+      bytes.length,
+      faceIndex,
+      face,
+    );
+
+    if (err != FT_Err_Ok) {
+      allocator.free(data);
+      throw Exception('Error on FT_New_Memory_Face: $err');
+    }
+
+    return Face.fromRaw(
+      raw.value,
+      face.value,
+      binding,
+      allocator,
+      nullptr,
+      memoryFontData: data,
+    );
+  }
+
   /// free memory
   void free() {
     if (_isFree) {
@@ -79,7 +110,7 @@ class Face {
   FT_Face raw;
   late GlyphSlot glyph;
   FreetypeBinding binding;
-  dynamic bytes;
+  Pointer<Uint8>? memoryFontData;
   Allocator allocator;
 
   bool _isFree = false;
@@ -91,7 +122,7 @@ class Face {
     this.binding,
     this.allocator,
     this.fontFilePathP, {
-    this.bytes,
+    this.memoryFontData,
   }) {
     glyph = GlyphSlot.fromRaw(library_raw, raw.ref.glyph, binding);
   }
@@ -198,6 +229,15 @@ class Face {
     _isFree = true;
     //_finalizer.detach(this);
     binding.FT_Done_Face(raw);
+
+    if (fontFilePathP != nullptr) {
+      allocator.free(fontFilePathP);
+    }
+    final mem = memoryFontData;
+    if (mem != null) {
+      allocator.free(mem);
+      memoryFontData = null;
+    }
   }
 }
 

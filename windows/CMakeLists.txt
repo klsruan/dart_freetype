@@ -1,26 +1,43 @@
-set(FREETYPE_DLLS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
-set(FLUTTER_DEBUG_DIR   "${CMAKE_BINARY_DIR}/../runner/Debug")
-set(FLUTTER_RELEASE_DIR "${CMAKE_BINARY_DIR}/../runner/Release")
+cmake_minimum_required(VERSION 3.15)
+project(dart_freetype_library LANGUAGES C)
 
-add_custom_command(
-    OUTPUT
-        "${CMAKE_BINARY_DIR}/Debug/.dlls_copied_stamp"
-        "${CMAKE_BINARY_DIR}/Release/.dlls_copied_stamp"
-    COMMAND ${CMAKE_COMMAND} -E make_directory
-        "${FLUTTER_DEBUG_DIR}"
-        "${FLUTTER_RELEASE_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${FREETYPE_DLLS_SOURCE_DIR}" "${FLUTTER_DEBUG_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${FREETYPE_DLLS_SOURCE_DIR}" "${FLUTTER_RELEASE_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E touch
-        "${CMAKE_BINARY_DIR}/Debug/.dlls_copied_stamp"
-    COMMAND ${CMAKE_COMMAND} -E touch
-        "${CMAKE_BINARY_DIR}/Release/.dlls_copied_stamp"
-    VERBATIM
+set(FREETYPE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../src/freetype")
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(FT_DISABLE_ZLIB ON CACHE BOOL "" FORCE)
+set(FT_DISABLE_BZIP2 ON CACHE BOOL "" FORCE)
+set(FT_DISABLE_PNG ON CACHE BOOL "" FORCE)
+set(FT_DISABLE_HARFBUZZ ON CACHE BOOL "" FORCE)
+set(FT_DISABLE_BROTLI ON CACHE BOOL "" FORCE)
+
+add_subdirectory("${FREETYPE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/freetype")
+
+add_library(dart_freetype SHARED
+  "${CMAKE_CURRENT_SOURCE_DIR}/../src/dart_freetype.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../src/freetype_wrapper.c"
 )
 
-add_custom_target(copy_freetype_dependencies ALL DEPENDS
-    "${CMAKE_BINARY_DIR}/Debug/.dlls_copied_stamp"
-    "${CMAKE_BINARY_DIR}/Release/.dlls_copied_stamp"
+target_include_directories(dart_freetype PRIVATE
+  "${FREETYPE_DIR}/include"
 )
+
+target_link_libraries(dart_freetype PRIVATE freetype)
+
+# Force all archive objects into the DLL so Dart can resolve the FreeType API.
+if (MSVC)
+  target_link_options(dart_freetype PRIVATE
+    "/WHOLEARCHIVE:$<TARGET_LINKER_FILE:freetype>"
+  )
+endif()
+
+set_target_properties(dart_freetype PROPERTIES
+  OUTPUT_NAME "dart_freetype"
+  WINDOWS_EXPORT_ALL_SYMBOLS ON
+)
+
+install(TARGETS dart_freetype
+  RUNTIME DESTINATION "."
+  LIBRARY DESTINATION "."
+  ARCHIVE DESTINATION "."
+)
+

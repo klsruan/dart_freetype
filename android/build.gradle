@@ -44,5 +44,17 @@ android {
 
     defaultConfig {
         minSdk = 21
+
+        externalNativeBuild {
+            cmake {
+                // Flutter sets `ANDROID_ABI`/`ANDROID_PLATFORM` for us.
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
     }
 }

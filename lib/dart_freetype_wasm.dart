@@ -1,1 +1,0 @@
-export 'src/wrapper/freetype_wasm.dart';

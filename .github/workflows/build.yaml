@@ -1,137 +1,54 @@
-name: Build All Architectures
+name: CI
 
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
-  build_desktop:
-    name: Build Desktop (${{ matrix.os }})
+  tests:
+    name: Tests (VM + Web)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OS deps
+        run: |
+          sudo apt update
+          sudo apt install -y xvfb
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Run all tests
+        shell: bash
+        run: |
+          chmod +x scripts/test_all.sh
+          ./scripts/test_all.sh
+
+  cmake_host_build:
+    name: CMake Host Build (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-
+        include:
+          - os: ubuntu-latest
+            platform_dir: linux
+          - os: macos-latest
+            platform_dir: macos
+          - os: windows-latest
+            platform_dir: windows
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt update
-          sudo apt install -y cmake meson ninja-build pkg-config libfreetype-dev
-
-      - name: Install dependencies (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install cmake meson ninja pkg-config freetype
-
-      - name: Install dependencies (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install mingw cmake ninja pkgconfiglite -y
-          python -m pip install --upgrade pip
-          pip install meson
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Flutter pub get
-        run: flutter pub get
-
-      - name: Generate FFI bindings
-        run: flutter pub run ffigen
-
-      - name: Build binaries
+      - name: Build host library (Linux/macOS/Windows)
         shell: bash
         run: |
-          chmod +x scripts/build.sh
-          ./scripts/build.sh
-
-      - name: Upload desktop artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: freetype-desktop-${{ matrix.os }}
-          path: |
-            src/freetype/build_${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows' }}/*.so
-            src/freetype/build_${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows' }}/*.dylib
-            src/freetype/build_${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'macos-latest' && 'macos' || 'windows' }}/*.dll
-
-  build_android:
-    name: Build Android (${{ matrix.abi }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        abi: [armeabi-v7a, arm64-v8a, x86_64]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install tools
-        run: |
-          sudo apt update
-          sudo apt install -y cmake ninja-build pkg-config libfreetype-dev
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Install Android NDK
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r26d
-          add-to-path: true
-
-      - name: Build Android (.so)
-        shell: bash
-        run: |
-          chmod +x scripts/build_android.sh
-          ./scripts/build_android.sh
-
-      - name: Upload android artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: freetype-android-${{ matrix.abi }}
-          path: build/android/${{ matrix.abi }}/
-
-  build_ios:
-    name: Build iOS
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          brew update
-          brew install cmake ninja pkg-config freetype
-          git clone https://github.com/leetal/ios-cmake.git /tmp/ios-cmake
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Flutter pub get
-        run: flutter pub get
-
-      - name: Generate FFI bindings
-        run: flutter pub run ffigen
-
-      - name: Build iOS (.dylib)
-        shell: bash
-        run: |
-          chmod +x scripts/build_ios.sh
-          ./scripts/build_ios.sh
-
-      - name: Upload iOS artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: freetype-ios
-          path: build_ios/**/*.a
+          cmake -S "./${{ matrix.platform_dir }}" -B "build/host_${{ matrix.platform_dir }}" -DCMAKE_BUILD_TYPE=Release
+          cmake --build "build/host_${{ matrix.platform_dir }}" --config Release

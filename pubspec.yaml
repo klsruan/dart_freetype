@@ -10,10 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.0.2
   ffi: ^2.1.3
-  path: ^1.9.1
-  wasm_interop: ^2.0.1
 
 dev_dependencies:
   ffigen: ^13.0.0
@@ -53,6 +50,7 @@ flutter:
 
   assets:
     - native_libs/wasm/freetype.wasm
+    - native_libs/wasm/freetype.js
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
