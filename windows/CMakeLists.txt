@@ -9,6 +9,9 @@ set(FT_DISABLE_BZIP2 ON CACHE BOOL "" FORCE)
 set(FT_DISABLE_PNG ON CACHE BOOL "" FORCE)
 set(FT_DISABLE_HARFBUZZ ON CACHE BOOL "" FORCE)
 set(FT_DISABLE_BROTLI ON CACHE BOOL "" FORCE)
+# Avoid MSVC link errors from duplicating FreeType's version resource when we
+# force-include the full static archive into our DLL.
+set(FT_DISABLE_WIN_RC ON CACHE BOOL "" FORCE)
 
 add_subdirectory("${FREETYPE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/freetype")
 

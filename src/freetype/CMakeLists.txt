@@ -464,8 +464,10 @@ endif ()
 
 if (WIN32)
   enable_language(RC)
-  list(APPEND BASE_SRCS builds/windows/ftdebug.c
-                        src/base/ftver.rc)
+  list(APPEND BASE_SRCS builds/windows/ftdebug.c)
+  if (NOT FT_DISABLE_WIN_RC)
+    list(APPEND BASE_SRCS src/base/ftver.rc)
+  endif ()
 elseif (WINCE)
   list(APPEND BASE_SRCS builds/wince/ftdebug.c)
 else ()
