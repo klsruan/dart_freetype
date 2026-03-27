@@ -21,13 +21,15 @@ target_include_directories(dart_freetype PRIVATE
   "${FREETYPE_DIR}/include"
 )
 
-target_link_libraries(dart_freetype PRIVATE freetype)
-
-# Force all archive objects into the DLL so Dart can resolve the FreeType API.
 if (MSVC)
+  # MSVC: link the static freetype archive once, but force all objects into the
+  # DLL so Dart can resolve the full FreeType API from `dart_freetype.dll`.
+  add_dependencies(dart_freetype freetype)
   target_link_options(dart_freetype PRIVATE
     "/WHOLEARCHIVE:$<TARGET_LINKER_FILE:freetype>"
   )
+else()
+  target_link_libraries(dart_freetype PRIVATE freetype)
 endif()
 
 set_target_properties(dart_freetype PROPERTIES
@@ -40,4 +42,3 @@ install(TARGETS dart_freetype
   LIBRARY DESTINATION "."
   ARCHIVE DESTINATION "."
 )
-
